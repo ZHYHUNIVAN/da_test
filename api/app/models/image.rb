@@ -3,7 +3,7 @@ class Image < ApplicationRecord
 
   belongs_to :artwork
 
-  validates :file, presence: true
+  validates :file, :artwork, presence: true
   validate :minimum_file_dimensions, if: -> { file.present? }
 
   delegate :width, :height, to: :file

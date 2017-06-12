@@ -1,6 +1,6 @@
-<template>
+<template xmlns:v-bind="http://www.w3.org/1999/xhtml">
   <div class="container">
-    <form @submit.prevent="createArtwork()" enctype="multipart/form-data">
+    <form @submit.prevent="createArtwork()">
       <div class="form-group row">
         <label for="add-title" class="col-sm-2 col-form-label">Title</label>
         <div class="col-sm-10">
@@ -37,11 +37,14 @@
         </div>
       </div>
       <div class="form-group row">
-        <label class="col-sm-2 col-form-label">ArtistID</label>
+        <label class="col-sm-2 col-form-label">Artist</label>
         <div class="col-sm-10">
-          <v-select id="add-artist-id"
-                    :value.sync="artwork.artist_id" :options="artistIds">
-          </v-select>
+          <select v-model="artwork.artist_id" class="form-control">
+            <option disabled value="">Please select an artist</option>
+            <option v-for="artist in artists" v-bind:value="artist.id">
+              {{ artist.name }}
+            </option>
+          </select>
         </div>
         <div class="form-group has-error" v-if="errors.artist" v-for="error in errors.artist">
           <label class="control-label">
@@ -49,30 +52,41 @@
           </label>
         </div>
       </div>
-      <div v-if="isFailed">
-        <h2>Uploaded failed.</h2>
-        <p>
-          <a href="javascript:void(0)" @click="reset()">Try again</a>
-        </p>
-        <span v-for="error in uploaderErrors">
-          <pre>
-            File {{ error.filename }}
-            <span v-for="message in error.messages">
-              {{ message }}
-            </span>
-          </pre>
-        </span>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Width</label>
+        <div class="col-sm-10">
+          <input type="number" class="form-control" id="add-width"
+                 placeholder="Width" v-model="artwork.width" required/>
+        </div>
+        <div class="form-group has-error" v-if="errors.width" v-for="error in errors.width">
+          <label class="control-label">
+            {{ error }}
+          </label>
+        </div>
       </div>
-      <div class="dropbox">
-        <input ref='filesUpload' type="file" multiple :disabled="isSaving || isFailed"
-               @change="filesChange($event.target.files); fileCount = $event.target.files.length"
-               accept="image/*" class="input-file">
-        <p v-if="isInitial">
-          Drag your file(s) here to begin<br> or click to browse
-        </p>
-        <p v-if="isSaving">
-          Uploading {{ fileCount }} files...
-        </p>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Height</label>
+        <div class="col-sm-10">
+          <input type="number" class="form-control" id="add-height"
+                 placeholder="Height" v-model="artwork.height" required/>
+        </div>
+        <div class="form-group has-error" v-if="errors.height" v-for="error in errors.height">
+          <label class="control-label">
+            {{ error }}
+          </label>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Depth</label>
+        <div class="col-sm-10">
+          <input type="number" class="form-control" id="add-depth"
+                 placeholder="Depth" v-model="artwork.depth" required/>
+        </div>
+        <div class="form-group has-error" v-if="errors.depth" v-for="error in errors.depth">
+          <label class="control-label">
+            {{ error }}
+          </label>
+        </div>
       </div>
 
       <button type=”submit” class="btn btn-primary">Create</button>
@@ -83,14 +97,10 @@
 
 <script>
   /* eslint-disable */
-  import vSelect from "vue-select"
   import httpClient from '../../utils/backend-api';
-
-  const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
 
   export default {
     name: 'CreateArtwork',
-    components: { vSelect },
     data() {
       return {
         artwork: {
@@ -98,45 +108,19 @@
           description: '',
           price: '',
           artist_id: '',
+          width: '',
+          height: '',
+          depth: ''
         },
-        artistIds: [],
-        currentStatus: null,
-        uploadedFiles: [],
+        artists: [],
         errors: {},
-        uploaderErrors: [],
       };
     },
-    computed: {
-      isInitial() {
-        return this.currentStatus === STATUS_INITIAL;
-      },
-      isSaving() {
-        return this.currentStatus === STATUS_SAVING;
-      },
-      isSuccess() {
-        return this.currentStatus === STATUS_SUCCESS;
-      },
-      isFailed() {
-        return this.currentStatus === STATUS_FAILED;
-      },
-    },
     methods: {
-      getArtistIds() {
-        const config = {
-          params: { 'ids': 'true' }
-        };
-        httpClient.getArtists('', config).then((response) => {
-          for (const id of response.ids) {
-            this.artistIds.push(id.toString());
-          };
+      getArtists() {
+        httpClient.getArtists('').then((response) => {
+          this.artists = response;
         });
-      },
-      reset() {
-        // reset form files to initial state
-        this.$refs.filesUpload.value = null;
-        this.currentStatus = STATUS_INITIAL;
-        this.uploadedFiles = [];
-        this.uploaderErrors = [];
       },
       createArtwork() {
         const formData = new FormData();
@@ -144,70 +128,20 @@
           formData.append('artwork[' + key + ']', this.artwork[key]);
         };
 
-        for (var i = 0; i < this.uploadedFiles.length; i++) {
-          let file = this.uploadedFiles[i];
-
-          formData.append('images[]', file, file.name);
-        };
-
-        const config = {
-          headers: { 'content-type': 'multipart/form-data' }
-        };
-        httpClient.createArtwork(formData, config).then((response) => {
-          this.currentStatus = STATUS_SUCCESS;
+        httpClient.createArtwork(formData).then((response) => {
           this.artwork = response;
           this.$router.push(`/artworks/${response.id}`);
         }).catch((error) => {
-          this.currentStatus = STATUS_FAILED;
-          this.uploaderErrors = error.response.data.image_errors;
           this.errors = error.response.data.errors;
         });
       },
-      filesChange(fileList) {
-        this.currentStatus = STATUS_SAVING;
-        // handle file changes
-        if (!fileList.length) return;
-        this.uploadedFiles = fileList;
-      },
     },
     mounted() {
-      this.getArtistIds();
-      this.reset();
+      this.getArtists();
     },
   };
 </script>
 
 <style scoped>
-  .dropbox {
-    outline: 2px dashed grey;
-    /* the dash box */
-    outline-offset: -10px;
-    background: lightcyan;
-    color: dimgray;
-    padding: 10px 10px;
-    min-height: 200px;
-    /* minimum height */
-    position: relative;
-    cursor: pointer;
-  }
 
-  .input-file {
-    opacity: 0;
-    /* invisible but it's there! */
-    width: 100%;
-    height: 200px;
-    position: absolute;
-    cursor: pointer;
-  }
-
-  .dropbox:hover {
-    background: lightblue;
-    /* when mouse over to the drop zone, change color */
-  }
-
-  .dropbox p {
-    font-size: 1.2em;
-    text-align: center;
-    padding: 50px 0;
-  }
 </style>

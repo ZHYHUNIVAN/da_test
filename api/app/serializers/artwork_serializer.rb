@@ -1,5 +1,5 @@
 class ArtworkSerializer < ActiveModel::Serializer
-  attributes :id, :title, :description, :price, :state
+  attributes :id, :title, :description, :price, :state, :dimensions
   has_many :images
   belongs_to :artist
 

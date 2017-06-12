@@ -1,51 +1,74 @@
-<template>
+<template xmlns:v-on="http://www.w3.org/1999/xhtml">
   <div>
-    <app-nav></app-nav>
     <h3 class="text-center">Artworks List</h3>
     <hr/>
 
     <div class="col-sm-4" v-for="artwork in artworks">
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title"> {{ artwork.title }} </h3>
+          <h3 class="panel-title pull-left"> {{ artwork.title }} </h3>
+          <button type="button" class="btn btn-default btn-xs pull-right"
+                  v-if="artwork.state === 'published'"
+                  v-on:click='unpublishArtwork(artwork.id)'>
+            <span class="glyphicon glyphicon-star"
+                  aria-hidden="true">
+            </span>
+          </button>
+          <button type="button" class="btn btn-default btn-xs pull-right"
+                  v-else v-on:click='publishArtwork(artwork.id)'>
+            <span class="glyphicon glyphicon-star-empty" aria-hidden="true">
+            </span>
+          </button>
+          <div class="clearfix"></div>
         </div>
-        <div class="panel-body">
+        <div class="panel-body thumbnail">
           <router-link :to="{ name: 'Artwork', params: { id: artwork.id }}">
-            <div class="row">
-              <div v-for="image in artwork.images">
-                <div class="col-md-4">
-                  <div class="thumbnail">
-                    <img :src="image.file.preview.url" style="max-width:100%;">
-                  </div>
-                </div>
-              </div>
-            </div>
+            <img v-if="artwork.images && artwork.images.length !== 0" :src="artwork.images[0].file.preview.url">
+            <img v-else src="../../assets/fallback.jpeg">
           </router-link>
         </div>
-        <button v-on:click='removeArtwork(artwork.id)' class="btn btn-danger">Remove</button>
+        <div class = "panel-footer"> Artist name: {{ artwork.artist.name }} </div>
+        <!--<button v-on:click='removeArtwork(artwork.id)' class="btn btn-danger">Remove</button>-->
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import AppNav from './../AppNav';
+  /* eslint-disable */
   import httpClient from '../../utils/backend-api';
 
   export default {
     name: 'Artworks',
-    components: {
-      AppNav,
-    },
     data() {
       return {
         artworks: [],
       };
     },
     methods: {
+      publishArtwork(id) {
+        httpClient.publishArtwork(id).then(() => {
+          this.artworks.forEach((artwork) => {
+            if(artwork.id === id)
+            {
+              artwork.state = 'published';
+            }
+          });
+        });
+      },
+      unpublishArtwork(id) {
+        httpClient.unpublishArtwork(id).then(() => {
+          this.artworks.forEach((artwork) => {
+            if(artwork.id === id)
+            {
+              artwork.state = 'unpublished';
+            }
+          });
+        });
+      },
       getArtworks() {
-        httpClient.getArtworks().then((artworks) => {
-          this.artworks = artworks;
+        httpClient.getArtworks().then((response) => {
+          this.artworks = response;
         });
       },
       removeArtwork(id) {
@@ -62,4 +85,8 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  .thumbnail img {
+    height: 300px;
+    /*max-width:100%;*/
+  }
 </style>

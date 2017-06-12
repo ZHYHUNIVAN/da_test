@@ -5,9 +5,9 @@
         <router-link to="/" class="navbar-brand"> ArtWorks Gallery </router-link>
       </div>
 
-      <div class="navbar-header navbar-right">
+      <div v-if="$route.name !== 'CreateArtwork'" class="navbar-header navbar-right">
         <router-link :to="{ name: 'CreateArtwork'}">
-          <span  class="btn btn-success navbar-brand">
+          <span  class="btn navbar-brand">
             Create Artwork
           </span>
         </router-link>
@@ -28,5 +28,18 @@
 
   .log {
     margin: 5px 10px 0 0;
+  }
+
+  .btn {
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    border-radius: 3px;
+    background-color: #555555;
+    color: white;
+  }
+
+  .btn:hover {
+    background-color: #aeaf19; /* Green */
+    color: white;
   }
 </style>

@@ -4,7 +4,8 @@ module Api
 
     # GET /artworks
     def index
-      artworks = Artwork.all
+      artworks = Artwork.includes(:images, :artist)
+                   .order(updated_at: :desc).paginate(page: params[:page])
 
       render json: artworks
     end
@@ -21,16 +22,17 @@ module Api
       if result.success?
         render json: result.artwork, status: :created
       else
-        render json: { errors: result.errors, image_errors: result.image_errors }, status: :unprocessable_entity
+        render json: { errors: result.errors }, status: :unprocessable_entity
       end
     end
 
     # PATCH/PUT /artworks/1
     def update
-      if @artwork.update(artwork_params)
-        render json: @artwork
+      result = UpdateArtwork.call(params: params)
+      if result.success?
+        render json: result.artwork
       else
-        render json: { errors: @artwork.errors }, status: :unprocessable_entity
+        render json: { errors: result.errors, image_errors: result.image_errors }, status: :unprocessable_entity
       end
     end
 
@@ -56,7 +58,8 @@ module Api
     # Only allow a trusted parameter "white list" through.
     def artwork_params
       params.require(:artwork).permit(
-        :title, :description, :price, :artist_id, images: []
+        :title, :description, :price, :artist_id,
+        :width, :height, :depth, images: []
       )
     end
   end
