@@ -7,6 +7,7 @@ module Api
       artworks = Artwork.includes(:images, :artist)
                    .order(updated_at: :desc).paginate(page: params[:page])
 
+      expires_in 3.minutes, :public => true
       render json: artworks
     end
 

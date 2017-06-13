@@ -5,12 +5,18 @@
         <router-link to="/" class="navbar-brand"> ArtWorks Gallery </router-link>
       </div>
 
-      <div v-if="$route.name !== 'CreateArtwork'" class="navbar-header navbar-right">
+      <div v-if="$route.name === 'Artworks'" class="navbar-header navbar-right">
         <router-link :to="{ name: 'CreateArtwork'}">
           <span  class="btn navbar-brand">
             Create Artwork
           </span>
         </router-link>
+      </div>
+
+      <div v-if="$route.name === 'Artwork'" class="navbar-header navbar-right">
+        <span  class="btn navbar-brand" data-toggle="modal" data-target="#myModal">
+            Edit Artwork
+        </span>
       </div>
     </div>
   </nav>
@@ -25,10 +31,6 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .navbar-right { margin-right: 0px !important}
-
-  .log {
-    margin: 5px 10px 0 0;
-  }
 
   .btn {
     -webkit-transition-duration: 0.4s; /* Safari */
