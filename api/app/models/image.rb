@@ -1,7 +1,7 @@
 class Image < ApplicationRecord
   mount_uploader :file, ImageUploader
 
-  belongs_to :artwork
+  belongs_to :artwork, touch: true
 
   validates :file, :artwork, presence: true
   validate :minimum_file_dimensions, if: -> { file.present? }

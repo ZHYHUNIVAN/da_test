@@ -21,6 +21,12 @@ export default {
     return axios.post(url, data, config).then(response => response.data);
   },
 
+  updateArtwork(id, data, config = {}) {
+    console.log(data);
+    const url = `${ARTWORKS_URL}/${id}`;
+    return axios.put(url, data, config).then(response => response.data);
+  },
+
   publishArtwork(id) {
     const url = `${ARTWORKS_URL}/${id}/publish`;
     return axios.post(url).then(response => response.data);

@@ -85,6 +85,10 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  .thumbnail {
+    box-shadow: none;
+    border-style: none;
+  }
   .thumbnail img {
     height: 300px;
     /*max-width:100%;*/

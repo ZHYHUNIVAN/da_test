@@ -7,12 +7,13 @@ module Api
       artworks = Artwork.includes(:images, :artist)
                    .order(updated_at: :desc).paginate(page: params[:page])
 
-      expires_in 3.minutes, :public => true
+      expires_in 1.day, :public => true
       render json: artworks
     end
 
     # GET /artworks/1
     def show
+      expires_in 1.day, :public => true
       render json: @artwork
     end
 
