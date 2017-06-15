@@ -14,7 +14,7 @@ class Artwork < ApplicationRecord
 
   validates_each :width, :height, :depth do |record, attr, value|
     record.errors.add(attr, :blank) if value.blank?
-    record.errors.add(attr, 'must be in range from 1 to 200') unless (1...200).include?(value)
+    record.errors.add(attr,:not_a_number) if value =~ /\A\d+\z/ ? false : true
   end
 
   state_machine :state, initial: :unpublished do
@@ -24,12 +24,6 @@ class Artwork < ApplicationRecord
 
     event :unpublish do
       transition published: :unpublished
-    end
-  end
-
-  %i(width height depth).each do |met_name|
-    define_method met_name do
-      super().to_i
     end
   end
 
