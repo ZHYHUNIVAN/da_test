@@ -3,7 +3,8 @@
 Before starting API server, from repo root:
 ```bash
 cd api
-rails db:create db:mirate db:seed
+bundle install
+rails db:create db:migrate db:seed
 ```
 then to start the server:
 ```bash
