@@ -12,7 +12,7 @@ ActiveRecord::Base.transaction do
     {
       title: "Artwork by #{artist.name}", description: "Some Artwork",
       artist_id: artist.id, price: rand(100..1_000_000),
-      width: rand(1...200), height: rand(1...200), depth: rand(1...200)
+      width: rand(1...200).to_s, height: rand(1...200).to_s, depth: rand(1...200).to_s
     }
   end
   artworks = Artwork.create(artworks)

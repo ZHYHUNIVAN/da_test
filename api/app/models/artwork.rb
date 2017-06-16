@@ -3,10 +3,11 @@ class Artwork < ApplicationRecord
 
   store_accessor :dimensions, :width, :height, :depth
 
-  belongs_to :artist, optional: true
+  belongs_to :artist
   has_many :images, dependent: :destroy
 
   with_options presence: true do
+    validates :artist
     validates :title, :description
     validates :artist, if: -> { artist_id }
     validates :price, numericality: { greater_than: 0, less_than: 10_000_000 }
